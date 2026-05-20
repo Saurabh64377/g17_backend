@@ -15,7 +15,7 @@ exports.registerUser = async (req, res) => {
             number,
             role_id
         } = req.body;
-        console.log(req.body)
+       
 
         // VALIDATION
 
