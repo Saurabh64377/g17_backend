@@ -1,0 +1,45 @@
+# node modules
+node_modules/
+
+# environment variables
+.env
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# runtime files
+pids
+*.pid
+*.seed
+
+# uploads
+uploads/
+
+# build folders
+dist/
+build/
+
+# cache
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# vscode
+.vscode/
+
+# coverage
+coverage/
+
+# temporary files
+tmp/
+temp/
+
+# package lock optional
+package-lock.json
+
+# yarn
+yarn-error.log
