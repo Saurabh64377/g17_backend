@@ -9,16 +9,12 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
-app.use(
-    "/uploads",
-    express.static("uploads")
-);
+app.use("/uploads",express.static("uploads"));
 
-const userRoutes = require("./routes/userRoutes");
-const shopRoutes = require("./routes/shopRoutes");
+const routes = require("./routes/route");
 
-app.use("/api/shop", shopRoutes);
-app.use("/api/users", userRoutes);
+
+app.use("/api", routes);
 
 
 const PORT = process.env.PORT || 5000;

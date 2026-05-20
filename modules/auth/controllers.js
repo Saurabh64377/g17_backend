@@ -1,7 +1,7 @@
-const db = require("../config/db");
+// controllers/shopController.js
+const db = require("../../config/db");
 const bcrypt = require("bcryptjs");
-const generateToken = require("../utils/generateToken");
-
+const generateToken = require("../../utils/generateToken");
 
 
 exports.registerUser = async (req, res) => {
