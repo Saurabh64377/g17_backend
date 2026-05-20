@@ -69,16 +69,23 @@ exports.getAllShops = async (req, res) => {
   try {
 
     const query = `
-      SELECT * FROM shops
-      ORDER BY id DESC
+      SELECT 
+        shops.id,
+        shops.name,
+        shops.icon,
+        COUNT(categories.id) AS total_categories
+      FROM shops
+      LEFT JOIN categories 
+        ON shops.id = categories.shop_id
+      GROUP BY shops.id
+      ORDER BY shops.id DESC
     `;
 
     const [rows] = await db.query(query);
 
     const data = rows.map((shop) => ({
       ...shop,
-      icon_url:
-        `${req.protocol}://${req.get("host")}/uploads/${shop.icon}`
+      icon_url: `${req.protocol}://${req.get("host")}/uploads/${shop.icon}`
     }));
 
     return res.status(200).json({

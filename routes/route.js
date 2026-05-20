@@ -31,13 +31,9 @@ router.delete("/delete/:id",deleteShop);
 
 // auth controllers
 router.post("/register", registerUser);
-
 router.post("/login", loginUser);
-
 router.get("/all-users", authMiddleware, getUsers);
-
 router.put("/update/:id", authMiddleware, updateUser);
-
 router.delete("/delete/:id", authMiddleware, deleteUser);
 
 
