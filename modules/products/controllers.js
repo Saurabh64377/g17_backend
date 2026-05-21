@@ -1,58 +1,59 @@
 const db = require("../../config/db");
-
-exports.createShop = async (req, res) => {
+exports.createProduct = async (req, res) => {
   try {
-    const { name, subname, icon, bg, color } = req.body;
+    const { shop_id, name, icon, bg, color, description } = req.body;
 
     // validation
-    if (!name) {
+    if (!shop_id) {
       return res.status(400).json({
         success: false,
-        message: "Shop name is required",
+        message: "shop_id is required",
       });
     }
 
-    if (!icon) {
+    if (!name) {
       return res.status(400).json({
         success: false,
-        message: "Shop icon is required",
+        message: "Product name is required",
       });
     }
 
     const query = `
-      INSERT INTO shops (
+      INSERT INTO products (
+        shop_id,
         name,
-        subname,
         icon,
         bg,
-        color
+        color,
+        description
       )
-      VALUES (?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await db.query(query, [
+      shop_id,
       name,
-      subname || null,
-      icon,
+      icon || null,
       bg || null,
       color || null,
+      description || null,
     ]);
 
     return res.status(201).json({
       success: true,
-      message: "Shop created successfully",
+      message: "Product created successfully",
       data: {
         id: result.insertId,
+        shop_id,
         name,
-        subname,
         icon,
         bg,
         color,
+        description,
       },
     });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({
       success: false,
       message: "Server Error",
@@ -60,19 +61,23 @@ exports.createShop = async (req, res) => {
   }
 };
 
-exports.getAllShops = async (req, res) => {
+exports.getAllProducts = async (req, res) => {
   try {
     const query = `
       SELECT 
-        shops.id,
-        shops.name,
-        shops.subname,
-        shops.icon,
-        shops.bg,
-        shops.color,
-        shops.created_at
-      FROM shops
-      ORDER BY shops.id ASC
+        products.id,
+        products.shop_id,
+        products.name,
+        products.icon,
+        products.bg,
+        products.color,
+        products.description,
+        products.created_at,
+        products.updated_at,
+        shops.name AS shop_name
+      FROM products
+      JOIN shops ON products.shop_id = shops.id
+      ORDER BY products.id DESC
     `;
 
     const [rows] = await db.query(query);
@@ -83,7 +88,6 @@ exports.getAllShops = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({
       success: false,
       message: "Server Error",
@@ -91,21 +95,16 @@ exports.getAllShops = async (req, res) => {
   }
 };
 
-exports.getSingleShop = async (req, res) => {
+exports.getSingleProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const query = `
-      SELECT * FROM shops
-      WHERE id = ?
-    `;
-
-    const [rows] = await db.query(query, [id]);
+    const [rows] = await db.query(`SELECT * FROM products WHERE id = ?`, [id]);
 
     if (rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Shop not found",
+        message: "Product not found",
       });
     }
 
@@ -115,7 +114,6 @@ exports.getSingleShop = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({
       success: false,
       message: "Server Error",
@@ -123,56 +121,51 @@ exports.getSingleShop = async (req, res) => {
   }
 };
 
-exports.updateShop = async (req, res) => {
+exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
+    const { shop_id, name, icon, bg, color, description } = req.body;
 
-    const { name, subname, icon, bg, color } = req.body;
-
-    const [rows] = await db.query(`SELECT * FROM shops WHERE id = ?`, [id]);
+    const [rows] = await db.query(`SELECT * FROM products WHERE id = ?`, [id]);
 
     if (rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Shop not found",
+        message: "Product not found",
       });
     }
 
-    const oldShop = rows[0];
+    const old = rows[0];
 
     const query = `
-      UPDATE shops
+      UPDATE products
       SET
+        shop_id = ?,
         name = ?,
-        subname = ?,
         icon = ?,
         bg = ?,
         color = ?,
+        description = ?,
         updated_at = NOW()
       WHERE id = ?
     `;
 
     await db.query(query, [
-      name || oldShop.name,
-
-      subname !== undefined ? subname : oldShop.subname,
-
-      icon || oldShop.icon,
-
-      bg !== undefined ? bg : oldShop.bg,
-
-      color !== undefined ? color : oldShop.color,
-
+      shop_id || old.shop_id,
+      name || old.name,
+      icon || old.icon,
+      bg || old.bg,
+      color || old.color,
+      description || old.description,
       id,
     ]);
 
     return res.status(200).json({
       success: true,
-      message: "Shop updated successfully",
+      message: "Product updated successfully",
     });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({
       success: false,
       message: "Server Error",
@@ -180,28 +173,27 @@ exports.updateShop = async (req, res) => {
   }
 };
 
-exports.deleteShop = async (req, res) => {
+exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [rows] = await db.query(`SELECT * FROM shops WHERE id = ?`, [id]);
+    const [rows] = await db.query(`SELECT * FROM products WHERE id = ?`, [id]);
 
     if (rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Shop not found",
+        message: "Product not found",
       });
     }
 
-    await db.query(`DELETE FROM shops WHERE id = ?`, [id]);
+    await db.query(`DELETE FROM products WHERE id = ?`, [id]);
 
     return res.status(200).json({
       success: true,
-      message: "Shop deleted successfully",
+      message: "Product deleted successfully",
     });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({
       success: false,
       message: "Server Error",
@@ -209,17 +201,14 @@ exports.deleteShop = async (req, res) => {
   }
 };
 
-exports.getShopsForDropdown = async (req, res) => {
+exports.getProductsByShop = async (req, res) => {
   try {
-    const query = `
-      SELECT 
-        id,
-        name
-      FROM shops
-      ORDER BY name ASC
-    `;
+    const { shop_id } = req.params;
 
-    const [rows] = await db.query(query);
+    const [rows] = await db.query(
+      `SELECT * FROM products WHERE shop_id = ? ORDER BY id DESC`,
+      [shop_id],
+    );
 
     return res.status(200).json({
       success: true,
@@ -227,7 +216,6 @@ exports.getShopsForDropdown = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({
       success: false,
       message: "Server Error",
@@ -235,10 +223,10 @@ exports.getShopsForDropdown = async (req, res) => {
   }
 };
 
-exports.totalShops = async (req, res) => {
+exports.totalproducts = async (req, res) => {
   try {
     const query = `
-      SELECT COUNT(*) AS total FROM shops
+      SELECT COUNT(*) AS total FROM products
     `;
 
     const [rows] = await db.query(query);
@@ -249,7 +237,6 @@ exports.totalShops = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({
       success: false,
       message: "Server Error",
