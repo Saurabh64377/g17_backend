@@ -70,20 +70,15 @@ exports.getAllShops = async (req, res) => {
         shops.icon,
         shops.bg,
         shops.color,
-        shops.created_at,
-        COUNT(categories.id) AS total_categories
+        shops.created_at
       FROM shops
-      LEFT JOIN categories 
-        ON shops.id = categories.shop_id
-      GROUP BY shops.id
-      ORDER BY shops.id DESC
+      ORDER BY shops.id ASC
     `;
 
     const [rows] = await db.query(query);
 
     return res.status(200).json({
       success: true,
-      total: rows.length,
       data: rows,
     });
   } catch (error) {
