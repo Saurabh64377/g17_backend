@@ -2,7 +2,6 @@
 
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/upload");
 const authMiddleware = require("../middleware/authMiddleware");
 
 
@@ -23,11 +22,11 @@ const {
 } = require("../modules/auth/controllers");
 
 
-router.post("/create",upload.single("icon"),createShop);
-router.get("/all",getAllShops);
-router.get("/single/:id",getSingleShop);
-router.put("/update/:id",upload.single("icon"),updateShop);
-router.delete("/delete/:id",deleteShop);
+router.post("/createshop",createShop);
+router.get("/allshops",getAllShops);
+router.get("/singleshop/:id",getSingleShop);
+router.put("/updateshop/:id",updateShop);
+router.delete("/deleteshop/:id",deleteShop);
 
 // auth controllers
 router.post("/register", registerUser);
