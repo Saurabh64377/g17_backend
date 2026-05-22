@@ -206,7 +206,7 @@ exports.getProductsByShop = async (req, res) => {
     const { shop_id } = req.params;
 
     const [rows] = await db.query(
-      `SELECT * FROM products WHERE shop_id = ? ORDER BY id DESC`,
+      `SELECT * FROM products WHERE shop_id = ? ORDER BY id ASC`,
       [shop_id],
     );
 
