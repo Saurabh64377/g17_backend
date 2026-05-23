@@ -1,7 +1,8 @@
 const db = require("../../config/db");
+
 exports.createProduct = async (req, res) => {
   try {
-    const { shop_id, name, icon, bg, color, description } = req.body;
+    const { shop_id, name, icon, bg, color } = req.body;
 
     // validation
     if (!shop_id) {
@@ -24,10 +25,9 @@ exports.createProduct = async (req, res) => {
         name,
         icon,
         bg,
-        color,
-        description
+        color
       )
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
     const [result] = await db.query(query, [
@@ -36,7 +36,6 @@ exports.createProduct = async (req, res) => {
       icon || null,
       bg || null,
       color || null,
-      description || null,
     ]);
 
     return res.status(201).json({
@@ -49,8 +48,57 @@ exports.createProduct = async (req, res) => {
         icon,
         bg,
         color,
-        description,
       },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+exports.updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { shop_id, name, icon, bg, color } = req.body;
+
+    const [rows] = await db.query(`SELECT * FROM products WHERE id = ?`, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    const old = rows[0];
+
+    const query = `
+      UPDATE products
+      SET
+        shop_id = ?,
+        name = ?,
+        icon = ?,
+        bg = ?,
+        color = ?,
+        updated_at = NOW()
+      WHERE id = ?
+    `;
+
+    await db.query(query, [
+      shop_id || old.shop_id,
+      name || old.name,
+      icon || old.icon,
+      bg || old.bg,
+      color || old.color,
+      id,
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
     });
   } catch (error) {
     console.log(error);
@@ -71,7 +119,6 @@ exports.getAllProducts = async (req, res) => {
         products.icon,
         products.bg,
         products.color,
-        products.description,
         products.created_at,
         products.updated_at,
         shops.name AS shop_name
@@ -111,58 +158,6 @@ exports.getSingleProduct = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: rows[0],
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
-};
-
-exports.updateProduct = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { shop_id, name, icon, bg, color, description } = req.body;
-
-    const [rows] = await db.query(`SELECT * FROM products WHERE id = ?`, [id]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
-
-    const old = rows[0];
-
-    const query = `
-      UPDATE products
-      SET
-        shop_id = ?,
-        name = ?,
-        icon = ?,
-        bg = ?,
-        color = ?,
-        description = ?,
-        updated_at = NOW()
-      WHERE id = ?
-    `;
-
-    await db.query(query, [
-      shop_id || old.shop_id,
-      name || old.name,
-      icon || old.icon,
-      bg || old.bg,
-      color || old.color,
-      description || old.description,
-      id,
-    ]);
-
-    return res.status(200).json({
-      success: true,
-      message: "Product updated successfully",
     });
   } catch (error) {
     console.log(error);
